@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.env
+timeline.json
+
+# Node
+node_modules/
+dist/
+.vite/
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel and Render
+.vercel/
+.render/
