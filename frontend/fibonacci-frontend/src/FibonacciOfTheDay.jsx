@@ -12,7 +12,7 @@ export default function FibonacciOfTheDay() {
     setError(null);
 
     try {
-      const res = await fetch("https://fibonacci-backend.onrender.com/api/image-of-the-day");
+      const res = await fetch("https://fibonacci-of-the-day.onrender.com/api/image-of-the-day");
       const data = await res.json();
       setImageUrl(data.image_url);
       setCaption(data.caption || "This image reflects a natural occurrence of the Fibonacci sequence.");
@@ -36,7 +36,7 @@ export default function FibonacciOfTheDay() {
   };
 
   useEffect(() => {
-    fetch("https://fibonacci-backend.onrender.com/api/timeline")
+    fetch("https://fibonacci-of-the-day.onrender.com/api/timeline")
       .then((res) => res.json())
       .then((data) => setTimeline(data));
   }, []);
