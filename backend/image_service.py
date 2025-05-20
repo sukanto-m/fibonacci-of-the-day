@@ -1,8 +1,8 @@
 import os
 import httpx
-import random 
 import openai
 import json
+import random
 from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -25,7 +25,7 @@ async def generate_caption(image_description: str) -> str:
     ]
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=messages,
             temperature=0.7,
             max_tokens=60,
@@ -70,10 +70,28 @@ async def get_image_of_the_day():
         if "images_results" not in data or not data["images_results"]:
             raise ValueError("No images found from SerpAPI.")
 
-        top_image = random.choice(data["images_results"][:5])
+        # Load last used image URL
+        last_image_url = None
+        if os.path.exists(DB_FILE):
+            with open(DB_FILE, "r") as f:
+                existing = json.load(f)
+                if existing:
+                    last_date = sorted(existing.keys())[-1]
+                    last_image_url = existing[last_date]["image_url"]
+
+        # Choose random image, avoiding duplicate
+        images = data["images_results"][:5]
+        random.shuffle(images)
+
+        for img in images:
+            if img["original"] != last_image_url:
+                top_image = img
+                break
+        else:
+            top_image = images[0]  # fallback
+
         image_url = top_image["original"]
         title = top_image.get("title", "a Fibonacci spiral in nature")
-
         caption = await generate_caption(title)
 
         result = {"image_url": image_url, "caption": caption}
