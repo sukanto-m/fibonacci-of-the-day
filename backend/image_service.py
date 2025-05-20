@@ -19,13 +19,19 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 cache = {}
 
 async def generate_caption(image_description: str) -> str:
+    prompt = (
+        f"This image shows a natural pattern that illustrates the Fibonacci sequence: '{image_description}'. "
+        "Explain briefly how it relates to Fibonacci numbers. Keep the explanation under 40 words."
+    )
+
     messages: list[ChatCompletionMessageParam] = [
         {"role": "system", "content": "You are a science explainer."},
-        {"role": "user", "content": f"Explain briefly how this image represents the Fibonacci sequence: '{image_description}'. Keep it factual and under 40 words."}
+        {"role": "user", "content": prompt}
     ]
+
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=messages,
             temperature=0.7,
             max_tokens=60,
