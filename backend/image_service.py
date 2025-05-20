@@ -1,5 +1,6 @@
 import os
 import httpx
+import random 
 import openai
 import json
 from datetime import datetime
@@ -69,7 +70,7 @@ async def get_image_of_the_day():
         if "images_results" not in data or not data["images_results"]:
             raise ValueError("No images found from SerpAPI.")
 
-        top_image = data["images_results"][0]
+        top_image = random.choice(data["images_results"][:5])
         image_url = top_image["original"]
         title = top_image.get("title", "a Fibonacci spiral in nature")
 
