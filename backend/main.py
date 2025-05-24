@@ -9,12 +9,15 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
+        "http://localhost:5173",                 # for dev
+        "https://todays-fibonacci.link",         # your custom domain
+        "https://fibonacci.vercel.app",          # optional Vercel fallback
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.get("/api/image-of-the-day")
 async def image_of_the_day():
