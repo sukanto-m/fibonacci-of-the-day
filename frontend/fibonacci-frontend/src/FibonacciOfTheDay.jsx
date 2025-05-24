@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 const BASE_URL = import.meta.env.DEV
   ? ""
-  : "https://fibonacci-backend.onrender.com";
+  : "https://fibonacci-of-the-day.onrender.com";
 
 export default function FibonacciOfTheDay() {
   const [imageUrl, setImageUrl] = useState("");

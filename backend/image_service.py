@@ -33,7 +33,7 @@ async def generate_caption(image_description: str) -> str:
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=messages,
             temperature=0.7,
             max_tokens=60,
