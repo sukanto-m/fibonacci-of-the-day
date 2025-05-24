@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 
+const BASE_URL = import.meta.env.DEV
+  ? ""
+  : "https://fibonacci-backend.onrender.com";
+
 export default function FibonacciOfTheDay() {
   const [imageUrl, setImageUrl] = useState("");
   const [caption, setCaption] = useState("");
+  const [credit, setCredit] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [timeline, setTimeline] = useState({});
@@ -12,10 +17,11 @@ export default function FibonacciOfTheDay() {
     setError(null);
 
     try {
-      const res = await fetch("https://fibonacci-of-the-day.onrender.com/api/image-of-the-day");
+      const res = await fetch(`${BASE_URL}/api/image-of-the-day`);
       const data = await res.json();
       setImageUrl(data.image_url);
       setCaption(data.caption || "This image reflects a natural occurrence of the Fibonacci sequence.");
+      setCredit(data.credit || null);
     } catch (err) {
       setError("Failed to load image.");
     } finally {
@@ -36,7 +42,7 @@ export default function FibonacciOfTheDay() {
   };
 
   useEffect(() => {
-    fetch("https://fibonacci-of-the-day.onrender.com/api/timeline")
+    fetch(`${BASE_URL}/api/timeline`)
       .then((res) => res.json())
       .then((data) => setTimeline(data));
   }, []);
@@ -71,7 +77,21 @@ export default function FibonacciOfTheDay() {
               className="max-w-full h-auto rounded-xl shadow-md mb-4"
             />
             <p className="text-gray-700 italic max-w-2xl text-center mb-2">{caption}</p>
-            <div className="flex gap-4">
+            {credit && (
+              <p className="text-xs text-gray-500 italic mt-1">
+                Photo by{" "}
+                <a
+                  href={credit.profile_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  {credit.photographer}
+                </a>{" "}
+                on <a href="https://unsplash.com" className="underline" target="_blank" rel="noopener noreferrer">Unsplash</a>
+              </p>
+            )}
+            <div className="flex gap-4 mt-2">
               <a
                 href={imageUrl}
                 download

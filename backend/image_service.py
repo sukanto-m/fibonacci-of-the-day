@@ -2,20 +2,22 @@ import os
 import httpx
 import openai
 import json
-import random
 from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
-load_dotenv(override=True)
+load_dotenv()
 
-SERPAPI_KEY = os.getenv("SERPAPI_KEY")
+# API keys
+UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-SERPAPI_URL = "https://serpapi.com/search.json"
-DB_FILE = "timeline.json"
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Constants
+UNSPLASH_URL = "https://api.unsplash.com/photos/random"
+DB_FILE = "timeline.json"
 cache = {}
 
 async def generate_caption(image_description: str) -> str:
@@ -31,7 +33,7 @@ async def generate_caption(image_description: str) -> str:
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=messages,
             temperature=0.7,
             max_tokens=60,
@@ -62,45 +64,33 @@ async def get_image_of_the_day():
         return cache[today]
 
     params = {
-        "engine": "google",
-        "q": "fibonacci spiral in nature",
-        "tbm": "isch",
-        "api_key": SERPAPI_KEY,
+        "query": "fibonacci spiral nature",
+        "orientation": "landscape",
+        "client_id": UNSPLASH_ACCESS_KEY,
     }
 
     async with httpx.AsyncClient() as client_http:
-        response = await client_http.get(SERPAPI_URL, params=params, timeout=10.0)
+        response = await client_http.get(UNSPLASH_URL, params=params, timeout=10.0)
         response.raise_for_status()
         data = response.json()
 
-        if "images_results" not in data or not data["images_results"]:
-            raise ValueError("No images found from SerpAPI.")
+        # Extract image details
+        image_url = data["urls"]["regular"]
+        title = data.get("alt_description") or "a Fibonacci spiral in nature"
+        photographer = data["user"]["name"]
+        photographer_url = data["user"]["links"]["html"]
 
-        # Load last used image URL
-        last_image_url = None
-        if os.path.exists(DB_FILE):
-            with open(DB_FILE, "r") as f:
-                existing = json.load(f)
-                if existing:
-                    last_date = sorted(existing.keys())[-1]
-                    last_image_url = existing[last_date]["image_url"]
-
-        # Choose random image, avoiding duplicate
-        images = data["images_results"][:5]
-        random.shuffle(images)
-
-        for img in images:
-            if img["original"] != last_image_url:
-                top_image = img
-                break
-        else:
-            top_image = images[0]  # fallback
-
-        image_url = top_image["original"]
-        title = top_image.get("title", "a Fibonacci spiral in nature")
         caption = await generate_caption(title)
 
-        result = {"image_url": image_url, "caption": caption}
+        result = {
+            "image_url": image_url,
+            "caption": caption,
+            "credit": {
+                "photographer": photographer,
+                "profile_url": photographer_url
+            }
+        }
+
         cache[today] = result
         save_to_timeline(today, result)
         return result
